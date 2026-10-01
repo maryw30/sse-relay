@@ -132,10 +132,16 @@ requires, and the client reassembles them with newlines in between.
 | `-heartbeat` | `15s` | delay between `: ping` frames |
 | `-retry` | `2s` | reconnect delay advertised in the `retry:` field |
 | `-shutdown-timeout` | `10s` | grace period for in-flight requests |
+| `-log-format` | `text` | request log format on stderr, `text` or `json` |
 
 | Environment | Meaning |
 |---|---|
 | `RELAY_TOKEN` | when set, `POST` and `DELETE` require `Authorization: Bearer <token>`; reads stay public |
+
+Every request is logged once, when it finishes, with method, path, status,
+bytes written, duration and remote address. A subscription is logged when the
+client goes away, so its duration is the length of the session. Headers are
+never logged.
 
 Sizing the buffer: it is a per stream cap, so worst case memory is roughly
 `streams x buffer x average chunk size`. For token deltas of ~4 bytes, 1024

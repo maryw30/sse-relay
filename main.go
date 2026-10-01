@@ -17,14 +17,16 @@ func main() {
 	heartbeat := flag.Duration("heartbeat", 15*time.Second, "delay between : ping frames")
 	retry := flag.Duration("retry", 2*time.Second, "reconnect delay advertised in the retry: field")
 	shutdownTimeout := flag.Duration("shutdown-timeout", 10*time.Second, "grace period for in-flight requests")
+	logFormat := flag.String("log-format", "text", "request log format: text or json")
 	flag.Parse()
 
 	relay := NewRelay(*bufferSize)
 	srv := NewServer(relay, *heartbeat, *retry, os.Getenv("RELAY_TOKEN"))
 
+	logger := newLogger(os.Stderr, *logFormat)
 	httpServer := &http.Server{
 		Addr:    *addr,
-		Handler: srv.Routes(),
+		Handler: withLogging(logger, srv.Routes()),
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
